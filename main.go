@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+	"flag"
 	"fmt"
 	"image"
 	"image/color"
@@ -8,7 +10,6 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"os"
-	"strconv"
 	"unicode/utf8"
 
 	"github.com/nfnt/resize"
@@ -19,7 +20,7 @@ const DENSITY = " .;coPO?@■"
 
 type Config struct {
 	path    string
-	scale   uint8
+	scale   uint
 	print   bool
 	colored bool
 	edges   bool
@@ -28,6 +29,7 @@ type Config struct {
 func main() {
 	config, err := manageArgs(os.Args[1:])
 	if err != nil {
+		fmt.Printf("Error: %s\n\n", err)
 		help()
 		return
 	}
@@ -99,34 +101,46 @@ func getImageFromPath(filepath string) (image.Image, string, error) {
 
 func manageArgs(args []string) (Config, error) {
 	var config Config
-	length := len(args)
 
-	for i := 0; i < length-1; i++ {
-		switch args[i] {
-		case "--scale", "-s":
-			if i <= length-1 {
-				scale, err := strconv.Atoi(args[i+1])
-				if err != nil {
-					config.scale = DEFAULT_SCALE
-				} else {
-					config.scale = uint8(scale)
-				}
-			}
-		case "--print", "-p":
-			config.print = true
-
-		case "--colored", "-c":
-			config.colored = true
-
-		case "--edges", "-e":
-			config.edges = true
-
-		}
+	if len(args) == 0 {
+		return config, errors.New("no arguments provided")
 	}
+
+	fs := flag.NewFlagSet(args[0], flag.ContinueOnError)
+
+	fs.UintVar(&config.scale, "scale", 8, "Specify the processing scale (optional, default: 8)")
+	fs.BoolVar(&config.print, "print", false, "Print the result (optional, default: false)")
+	fs.BoolVar(&config.colored, "colored", false, "Enable colored output (optional, default: false)")
+	fs.BoolVar(&config.edges, "edges", false, "Show only the edges (optional, default: false)")
+
+	// Parse flags
+	err := fs.Parse(args)
+	if err != nil {
+		return config, err
+	}
+
+	// Ensure the last argument is treated as the path
+	remainingArgs := fs.Args()
+	if len(remainingArgs) == 0 {
+		return config, errors.New("path is required")
+	}
+	config.path = remainingArgs[len(remainingArgs)-1]
 
 	return config, nil
 }
 
 func help() {
-	fmt.Println("Usage: go run . <image-file>")
+	fmt.Println("Usage:")
+	fmt.Println("  image-to-ascii [OPTIONS] <PATH>")
+	fmt.Println()
+	fmt.Println("Flags:")
+	fmt.Println("  -h, --help          Show this help message and exit")
+	fmt.Println("  -scale uint8        Specify the processing scale (optional, default: 8)")
+	fmt.Println("  -print              Print the result (optional, default: false)")
+	fmt.Println("  -colored            Enable colored output (optional, default: false)")
+	fmt.Println("  -edges              Show only the edges (optional, default: false)")
+	fmt.Println()
+	fmt.Println("Examples:")
+	fmt.Println("  image-to-ascii --scale 2 --print --colored image.png")
+	fmt.Println("  image-to-ascii --edges image.png")
 }
