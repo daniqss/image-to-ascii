@@ -30,15 +30,18 @@ func (ascii Ascii) generateAscii() error {
 	}
 
 
-	imgResized := resize.Resize(uint(width), uint(height), ascii.img, resize.Bilinear)
+	imgResized := resize.Resize(scaledW, scaledH, ascii.img, resize.Bilinear)
 	for x := range scaledH {
 		for y := range scaledW {
-			c := imgResized.At(int(y), int(x))
+			c := imgResized.At(int(x), int(y))
 			b := getBrightness(c)
 			char := getCharFromBrightness(b)
-			dc.DrawString(string(char), float64(x), float64(y))
+			str := append(make([]byte, 1), char)
+
+			dc.DrawString(string(str), float64(x * ascii.config.scale), float64(y * ascii.config.scale))
+			
 		}
-		dc.DrawString("aamai", 50, 50)
+		
 	}
 
     dc.SavePNG(ascii.config.path + "ascii.png")
@@ -51,7 +54,7 @@ func printAscii(img image.Image, config Config) {
 	for x := range height {
 		for y := range width {
 			color := imgResized.At(int(y), int(x))
-			// printColoredBackground(color, int(y), int(x))
+			
 			if config.colored {
 				printColoredBackground(color)
 			} else {

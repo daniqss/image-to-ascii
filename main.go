@@ -12,7 +12,7 @@ import (
 )
 
 const DEFAULT_SCALE = 8
-const DENSITY = " .;coPO?@■"
+const DENSITY = " .;coPO?@#"
 
 type Config struct {
 	path     string
@@ -55,7 +55,7 @@ func manageArgs(args []string) (Config, error) {
 	fs := flag.NewFlagSet(args[0], flag.ContinueOnError)
 
 	fs.StringVar(&config.fontPath, "fontPath", "/usr/share/fonts/OpenSans-BoldItalic.ttf", "Wanted font path (optional, default: /usr/share/fonts/OpenSans-BoldItalic.ttf)")
-	fs.UintVar(&config.scale, "scale", 8, "Specify the processing scale (optional, default: 8)")
+	fs.UintVar(&config.scale, "scale", DEFAULT_SCALE, "Specify the processing scale (optional, default: 8)")
 	fs.BoolVar(&config.print, "print", false, "Print the result (optional, default: false)")
 	fs.BoolVar(&config.colored, "colored", false, "Enable colored output (optional, default: false)")
 	fs.BoolVar(&config.edges, "edges", false, "Show only the edges (optional, default: false)")
