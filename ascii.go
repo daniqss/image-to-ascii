@@ -23,7 +23,9 @@ func (ascii Ascii) generateAscii() error {
 	scaledW, scaledH := uint(width)/uint(ascii.config.scale), uint(height)/uint(ascii.config.scale)
 
 	dc := gg.NewContext(width, height)
-	dc.SetColor(color.Black)
+	dc.SetRGB(0, 0, 0)
+    dc.Clear()
+	dc.SetColor(color.RGBA{R: 201, G: 91, B: 201, A: 255})
 
 	if err := dc.LoadFontFace(ascii.config.fontPath, float64(ascii.config.scale)); err != nil {
 		return err
