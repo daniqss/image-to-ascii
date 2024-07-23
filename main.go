@@ -13,8 +13,7 @@ import (
 )
 
 const DEFAULT_SCALE = 8
-// from acerola ascii shader video
-const DENSITY = " .;coPO@■ "
+const DENSITY = " .;coPO#@ "
 
 type Config struct {
 	path     string
