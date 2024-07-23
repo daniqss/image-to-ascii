@@ -39,9 +39,7 @@ func (ascii Ascii) generateAscii() error {
 			str := append(make([]byte, 1), char)
 
 			dc.DrawString(string(str), float64(x * ascii.config.scale), float64(y * ascii.config.scale))
-			
 		}
-		
 	}
 
     dc.SavePNG(ascii.config.path + "ascii.png")

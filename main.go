@@ -8,11 +8,13 @@ import (
 	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
+	"log"
 	"os"
 )
 
 const DEFAULT_SCALE = 8
-const DENSITY = " .;coPO?@#"
+// from acerola ascii shader video
+const DENSITY = " .;coPO@■ "
 
 type Config struct {
 	path     string
@@ -27,12 +29,12 @@ func main() {
 	config, err := manageArgs(os.Args[1:])
 	if err != nil {
 		help()
-		panic(err)
+		log.Fatal(err)
 	}
 
 	img, _, err := getImageFromPath(config.path)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	ascii := Ascii{
@@ -41,7 +43,7 @@ func main() {
 	}
 
 	if err := ascii.generateAscii(); err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 }
 
@@ -90,6 +92,7 @@ func help() {
 	fmt.Println("Examples:")
 	fmt.Println("  image-to-ascii --scale 2 --print --colored image.png")
 	fmt.Println("  image-to-ascii --edges image.png")
+	fmt.Println()
 }
 
 
