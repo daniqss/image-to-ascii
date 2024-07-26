@@ -13,6 +13,17 @@ import (
 	"github.com/nfnt/resize"
 )
 
+const DEFAULT_SCALE = 8
+const DENSITY = " .;coPO#@ "
+
+type Config struct {
+	path     string
+	fontPath string
+	scale    uint
+	print    bool
+	colored  bool
+}
+
 type Ascii struct {
 	img image.Image
 	config Config
@@ -48,14 +59,14 @@ func (ascii Ascii) generateAscii() error {
 	return nil
 }
 
-func printAscii(img image.Image, config Config) {
-	width, height := uint(img.Bounds().Max.X)/uint(config.scale), uint(img.Bounds().Max.Y)/uint(config.scale)
-	imgResized := resize.Resize(width, height, img, resize.Bilinear)
+func (ascii Ascii) printAscii() {
+	width, height := uint(ascii.img.Bounds().Max.X)/uint(ascii.config.scale), uint(ascii.img.Bounds().Max.Y)/uint(ascii.config.scale)
+	imgResized := resize.Resize(width, height, ascii.img, resize.Bilinear)
 	for x := range height {
 		for y := range width {
 			color := imgResized.At(int(y), int(x))
 			
-			if config.colored {
+			if ascii.config.colored {
 				printColoredBackground(color)
 			} else {
 				printAsciiChar(color)

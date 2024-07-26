@@ -12,18 +12,6 @@ import (
 	"os"
 )
 
-const DEFAULT_SCALE = 8
-const DENSITY = " .;coPO#@ "
-
-type Config struct {
-	path     string
-	fontPath string
-	scale    uint
-	print    bool
-	colored  bool
-	edges    bool
-}
-
 func main() {
 	config, err := manageArgs(os.Args[1:])
 	if err != nil {
@@ -41,8 +29,13 @@ func main() {
 		img: img,
 	}
 
-	if err := ascii.generateAscii(); err != nil {
-		log.Fatal(err)
+
+	if !ascii.config.print {
+		if err := ascii.generateAscii(); err != nil {
+			log.Fatal(err)
+		}
+ 	} else {
+		ascii.printAscii()
 	}
 }
 
@@ -59,7 +52,6 @@ func manageArgs(args []string) (Config, error) {
 	fs.UintVar(&config.scale, "scale", DEFAULT_SCALE, "Specify the processing scale (optional, default: 8)")
 	fs.BoolVar(&config.print, "print", false, "Print the result (optional, default: false)")
 	fs.BoolVar(&config.colored, "colored", false, "Enable colored output (optional, default: false)")
-	fs.BoolVar(&config.edges, "edges", false, "Show only the edges (optional, default: false)")
 
 	// Parse flags
 	err := fs.Parse(args)
