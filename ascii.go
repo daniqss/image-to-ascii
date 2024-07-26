@@ -55,7 +55,7 @@ func (ascii Ascii) generateAscii() error {
 		}
 	}
 
-    dc.SavePNG(ascii.config.path + "ascii.png")
+    dc.SavePNG(ascii.config.path + "_ascii.png")
 	return nil
 }
 

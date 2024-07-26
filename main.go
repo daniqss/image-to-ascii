@@ -82,7 +82,7 @@ func help() {
 	fmt.Println()
 	fmt.Println("Examples:")
 	fmt.Println("  image-to-ascii --scale 2 --print --colored image.png")
-	fmt.Println("  image-to-ascii --edges image.png")
+	fmt.Println("  image-to-ascii image.png")
 	fmt.Println()
 }
 
