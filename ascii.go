@@ -47,9 +47,10 @@ func (ascii Ascii) generateAscii() error {
 	for x := range scaledH {
 		for y := range scaledW {
 			c := imgResized.At(int(x), int(y))
+
 			b := getBrightness(c)
 			char := getCharFromBrightness(b)
-			str := append(make([]byte, 1), char)
+			str := append( make([]byte, 1), char)
 
 			dc.DrawString(string(str), float64(x * ascii.config.scale), float64(y * ascii.config.scale))
 		}
@@ -64,12 +65,12 @@ func (ascii Ascii) printAscii() {
 	imgResized := resize.Resize(width, height, ascii.img, resize.Bilinear)
 	for x := range height {
 		for y := range width {
-			color := imgResized.At(int(y), int(x))
+			c := imgResized.At(int(y), int(x))
 			
 			if ascii.config.colored {
-				printColoredBackground(color)
+				fmt.Printf("%s", sprintColoredBackground(c))
 			} else {
-				printAsciiChar(color)
+				printAsciiChar(c)
 			}
 		}
 		fmt.Printf("\033[0m\n")
@@ -78,13 +79,13 @@ func (ascii Ascii) printAscii() {
 	fmt.Printf("\033[0m")
 }
 
-func printColoredBackground(color color.Color) {
+func sprintColoredBackground(color color.Color) string {
 	r, g, b, _ := color.RGBA()
 
 	r8 := uint8(r >> 8)
 	g8 := uint8(g >> 8)
 	b8 := uint8(b >> 8)
-	fmt.Printf("\033[48;2;%d;%d;%dm  ", r8, g8, b8)
+	return fmt.Sprintf("\033[48;2;%d;%d;%dm  ", r8, g8, b8)
 }
 
 func printAsciiChar(c color.Color) {
