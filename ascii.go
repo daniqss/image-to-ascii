@@ -16,16 +16,8 @@ import (
 const DEFAULT_SCALE = 8
 const DENSITY = " .;coPO#@ "
 
-type Config struct {
-	path     string
-	fontPath string
-	scale    uint
-	print    bool
-	colored  bool
-}
-
 type Ascii struct {
-	img image.Image
+	img    image.Image
 	config Config
 }
 
@@ -35,13 +27,12 @@ func (ascii Ascii) generateAscii() error {
 
 	dc := gg.NewContext(width, height)
 	dc.SetRGB(0, 0, 0)
-    dc.Clear()
+	dc.Clear()
 	dc.SetColor(color.RGBA{R: 201, G: 91, B: 201, A: 255})
 
 	if err := dc.LoadFontFace(ascii.config.fontPath, float64(ascii.config.scale)); err != nil {
 		return err
 	}
-
 
 	imgResized := resize.Resize(scaledW, scaledH, ascii.img, resize.Bilinear)
 	for x := range scaledH {
@@ -50,13 +41,13 @@ func (ascii Ascii) generateAscii() error {
 
 			b := getBrightness(c)
 			char := getCharFromBrightness(b)
-			str := append( make([]byte, 1), char)
+			str := append(make([]byte, 1), char)
 
-			dc.DrawString(string(str), float64(x * ascii.config.scale), float64(y * ascii.config.scale))
+			dc.DrawString(string(str), float64(x*ascii.config.scale), float64(y*ascii.config.scale))
 		}
 	}
 
-    dc.SavePNG(ascii.config.path + "_ascii.png")
+	dc.SavePNG(ascii.config.path + "_ascii.png")
 	return nil
 }
 
@@ -66,7 +57,7 @@ func (ascii Ascii) printAscii() {
 	for x := range height {
 		for y := range width {
 			c := imgResized.At(int(y), int(x))
-			
+
 			if ascii.config.colored {
 				fmt.Printf("%s", sprintColoredBackground(c))
 			} else {

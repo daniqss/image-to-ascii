@@ -8,14 +8,26 @@ import (
 	"os"
 )
 
+type Config struct {
+	path     string
+	fontPath string
+	scale    uint
+	print    bool
+	colored  bool
+	help     bool
+}
+
 func main() {
 	config, err := manageArgs(os.Args[1:])
+	if config.help {
+		help()
+		return
+	}
 	if err != nil {
 		help()
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Processing image: %s\n", config.path)
 	useCliMode(config)
 }
 
@@ -32,6 +44,8 @@ func manageArgs(args []string) (Config, error) {
 	fs.UintVar(&config.scale, "scale", DEFAULT_SCALE, "Specify the processing scale (optional, default: 8)")
 	fs.BoolVar(&config.print, "print", false, "Print the result (optional, default: false)")
 	fs.BoolVar(&config.colored, "colored", false, "Enable colored output (optional, default: false)")
+	fs.BoolVar(&config.help, "help", false, "Show this help message and exit")
+	fs.BoolVar(&config.help, "h", false, "Show this help message and exit")
 
 	// Parse flags
 	err := fs.Parse(args)

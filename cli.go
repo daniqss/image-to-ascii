@@ -10,20 +10,6 @@ import (
 	"os"
 )
 
-func getImageFromPath(filepath string) (image.Image, string, error) {
-	f, err := os.Open(filepath)
-	if err != nil {
-		return nil, "", err
-	}
-	defer f.Close()
-
-	img, format, err := image.Decode(f)
-	if err != nil {
-		return nil, "", fmt.Errorf("failed to decode image: %w", err)
-	}
-	return img, format, err
-}
-
 func useCliMode(config Config) {
 	img, _, err := getImageFromPath(config.path)
 	if err != nil {
@@ -42,4 +28,18 @@ func useCliMode(config Config) {
 	} else {
 		ascii.printAscii()
 	}
+}
+
+func getImageFromPath(filepath string) (image.Image, string, error) {
+	f, err := os.Open(filepath)
+	if err != nil {
+		return nil, "", err
+	}
+	defer f.Close()
+
+	img, format, err := image.Decode(f)
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to decode image: %w", err)
+	}
+	return img, format, err
 }
