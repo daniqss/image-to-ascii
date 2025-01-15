@@ -22,7 +22,7 @@ func useCliMode(config Config) {
 	}
 
 	if !ascii.config.print {
-		if err := ascii.generateAscii(); err != nil {
+		if err := ascii.generateAscii(nil); err != nil {
 			log.Fatal(err)
 		}
 	} else {

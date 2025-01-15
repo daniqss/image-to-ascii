@@ -7,6 +7,7 @@ import (
 	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
+	"io"
 	"unicode/utf8"
 
 	"github.com/fogleman/gg"
@@ -21,7 +22,7 @@ type Ascii struct {
 	config Config
 }
 
-func (ascii Ascii) generateAscii() error {
+func (ascii Ascii) generateAscii(w *io.Writer) error {
 	width, height := ascii.img.Bounds().Dx(), ascii.img.Bounds().Dy()
 	scaledW, scaledH := uint(width)/uint(ascii.config.scale), uint(height)/uint(ascii.config.scale)
 
@@ -47,8 +48,21 @@ func (ascii Ascii) generateAscii() error {
 		}
 	}
 
-	dc.SavePNG(ascii.config.path + "_ascii.png")
-	return nil
+	if ascii.config.mode == "server" {
+		if w == nil {
+			return fmt.Errorf("no writer provided")
+		}
+
+		err := dc.EncodePNG(*w)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	} else {
+		dc.SavePNG(ascii.config.path + "_ascii.png")
+		return nil
+	}
 }
 
 func (ascii Ascii) printAscii() {
