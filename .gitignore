@@ -1,7 +1,2 @@
-image-to-ascii
-assets/image.png_ascii.png
-
-
-# Added by cargo
-
 /target
+test/image.png_ascii.png

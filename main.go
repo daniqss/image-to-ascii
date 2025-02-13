@@ -4,38 +4,41 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"image"
-	_ "image/gif"
-	_ "image/jpeg"
-	_ "image/png"
 	"log"
 	"os"
 )
 
+type Config struct {
+	mode     string
+	path     string
+	fontPath string
+	scale    uint
+	print    bool
+	colored  bool
+	help     bool
+}
+
 func main() {
 	config, err := manageArgs(os.Args[1:])
+	if config.help {
+		help()
+		return
+	}
 	if err != nil {
 		help()
 		log.Fatal(err)
 	}
 
-	img, _, err := getImageFromPath(config.path)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	ascii := Ascii{
-		config: config,
-		img: img,
-	}
-
-
-	if !ascii.config.print {
-		if err := ascii.generateAscii(); err != nil {
-			log.Fatal(err)
+	switch config.mode {
+	case "cli":
+		useCliMode(config)
+	case "server":
+		useServerMode(config)
+	default:
+		{
+			help()
+			log.Fatal("invalid mode")
 		}
- 	} else {
-		ascii.printAscii()
 	}
 }
 
@@ -48,10 +51,13 @@ func manageArgs(args []string) (Config, error) {
 
 	fs := flag.NewFlagSet(args[0], flag.ContinueOnError)
 
+	fs.StringVar(&config.mode, "mode", "cli", "Specify the mode (optional, default: cli)")
 	fs.StringVar(&config.fontPath, "fontPath", "/usr/share/fonts/OpenSans-BoldItalic.ttf", "Wanted font path (optional, default: /usr/share/fonts/OpenSans-BoldItalic.ttf)")
 	fs.UintVar(&config.scale, "scale", DEFAULT_SCALE, "Specify the processing scale (optional, default: 8)")
 	fs.BoolVar(&config.print, "print", false, "Print the result (optional, default: false)")
 	fs.BoolVar(&config.colored, "colored", false, "Enable colored output (optional, default: false)")
+	fs.BoolVar(&config.help, "help", false, "Show this help message and exit")
+	fs.BoolVar(&config.help, "h", false, "Show this help message and exit")
 
 	// Parse flags
 	err := fs.Parse(args)
@@ -60,12 +66,17 @@ func manageArgs(args []string) (Config, error) {
 	}
 
 	// Ensure the last argument is treated as the path
-	remainingArgs := fs.Args()
-	if len(remainingArgs) == 0 {
-		return config, errors.New("path is required")
+	if config.mode != "server" {
+		remainingArgs := fs.Args()
+		if len(remainingArgs) == 0 {
+			return config, errors.New("path is required")
+		}
+		config.path = remainingArgs[len(remainingArgs)-1]
+		return config, nil
 	}
-	config.path = remainingArgs[len(remainingArgs)-1]
 
+	// If is selected the server mode, the path is not required
+	config.path = ""
 	return config, nil
 }
 
@@ -74,29 +85,16 @@ func help() {
 	fmt.Println("  image-to-ascii [OPTIONS] <PATH>")
 	fmt.Println()
 	fmt.Println("Flags:")
-	fmt.Println("  -h, --help          Show this help message and exit")
+	fmt.Println("  -mode string        Specify the mode (optional, default: cli)")
+	fmt.Println("  -fontPath string    Wanted font path (optional, default: /usr/share/fonts/OpenSans-BoldItalic.ttf)")
 	fmt.Println("  -scale uint8        Specify the processing scale (optional, default: 8)")
 	fmt.Println("  -print              Print the result (optional, default: false)")
 	fmt.Println("  -colored            Enable colored output (optional, default: false)")
 	fmt.Println("  -edges              Show only the edges (optional, default: false)")
+	fmt.Println("  -h, --help          Show this help message and exit")
 	fmt.Println()
 	fmt.Println("Examples:")
 	fmt.Println("  image-to-ascii --scale 2 --print --colored image.png")
 	fmt.Println("  image-to-ascii image.png")
 	fmt.Println()
-}
-
-
-func getImageFromPath(filepath string) (image.Image, string, error) {
-	f, err := os.Open(filepath)
-	if err != nil {
-		return nil, "", err
-	}
-	defer f.Close()
-
-	img, format, err := image.Decode(f)
-	if err != nil {
-		return nil, "", fmt.Errorf("failed to decode image: %w", err)
-	}
-	return img, format, err
 }
