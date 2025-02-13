@@ -19,11 +19,27 @@ pub enum ImageToAsciiCommand {
 }
 
 #[derive(Parser, Debug)]
-#[command(about = "Run the CLI version of the tool", version)]
+#[command(
+    about = "Run the CLI version of the tool",
+    arg_required_else_help = true,
+    version
+)]
 pub struct CliCommand {
-    pub path: Option<OsString>,
+    /// path to the input image
+    #[arg(short, long)]
+    pub source_path: OsString,
+    /// path to the output image
+    #[arg(short, long)]
+    pub result_path: Option<OsString>,
+    /// path to the wanted font
+    #[arg(long, default_value = "/usr/share/fonts/OpenSans-BoldItalic.ttf")]
     pub font_path: Option<OsString>,
+    /// specify the processing scale
+    #[arg(short, long, default_value = "8")]
     pub scale: Option<usize>,
+    /// print the result to the terminal
     pub print: Option<bool>,
-    pub colored: Option<bool>,
+    /// color of the ascii art in hex
+    #[arg(short, long)]
+    pub color: Option<String>,
 }
