@@ -29,16 +29,38 @@ func (ascii Ascii) generateAscii(w *io.Writer) error {
 	dc := gg.NewContext(width, height)
 	dc.SetRGB(0, 0, 0)
 	dc.Clear()
+
+	// Default color if not using colored mode
 	dc.SetColor(color.RGBA{R: 201, G: 91, B: 201, A: 255})
 
-	if err := dc.LoadFontFace(ascii.config.fontPath, float64(ascii.config.scale)); err != nil {
-		return err
+	// manage font in cli mode
+	if ascii.config.mode == "cli" && ascii.config.fontPath != "" {
+		if err := dc.LoadFontFace(ascii.config.fontPath, float64(ascii.config.scale)); err != nil {
+			return err
+		}
+	}
+	if ascii.config.mode == "server" {
+		if err := dc.LoadFontFace("./fonts/"+ascii.config.fontPath+".ttf", float64(ascii.config.scale)); err != nil {
+			return err
+		}
 	}
 
 	imgResized := resize.Resize(scaledW, scaledH, ascii.img, resize.Bilinear)
-	for x := range scaledH {
-		for y := range scaledW {
+	for y := range scaledH {
+		for x := range scaledW {
 			c := imgResized.At(int(x), int(y))
+
+			// If colored mode is enabled, set the drawing color to match the pixel
+			if ascii.config.colored {
+				r, g, b, _ := c.RGBA()
+				// Convert from 0-65535 range to 0-255 range
+				dc.SetColor(color.RGBA{
+					R: uint8(r >> 8),
+					G: uint8(g >> 8),
+					B: uint8(b >> 8),
+					A: 255,
+				})
+			}
 
 			b := getBrightness(c)
 			char := getCharFromBrightness(b)
@@ -57,12 +79,11 @@ func (ascii Ascii) generateAscii(w *io.Writer) error {
 		if err != nil {
 			return err
 		}
-
-		return nil
 	} else {
 		dc.SavePNG(ascii.config.path + "_ascii.png")
-		return nil
 	}
+
+	return nil
 }
 
 func (ascii Ascii) printAscii() {

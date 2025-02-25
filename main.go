@@ -52,7 +52,7 @@ func manageArgs(args []string) (Config, error) {
 	fs := flag.NewFlagSet(args[0], flag.ContinueOnError)
 
 	fs.StringVar(&config.mode, "mode", "cli", "Specify the mode (optional, default: cli)")
-	fs.StringVar(&config.fontPath, "fontPath", "/usr/share/fonts/OpenSans-BoldItalic.ttf", "Wanted font path (optional, default: /usr/share/fonts/OpenSans-BoldItalic.ttf)")
+	fs.StringVar(&config.fontPath, "fontPath", "", "Wanted ttf font path (optional, default: /usr/share/fonts/OpenSans-BoldItalic.ttf)")
 	fs.UintVar(&config.scale, "scale", DEFAULT_SCALE, "Specify the processing scale (optional, default: 8)")
 	fs.BoolVar(&config.print, "print", false, "Print the result (optional, default: false)")
 	fs.BoolVar(&config.colored, "colored", false, "Enable colored output (optional, default: false)")

@@ -1,2 +1,3 @@
 image-to-ascii
 test/image.png_ascii.png
+fonts/*
