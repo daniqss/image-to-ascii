@@ -7,6 +7,7 @@ import (
 	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
+	"io"
 	"unicode/utf8"
 
 	"github.com/fogleman/gg"
@@ -16,47 +17,72 @@ import (
 const DEFAULT_SCALE = 8
 const DENSITY = " .;coPO#@ "
 
-type Config struct {
-	path     string
-	fontPath string
-	scale    uint
-	print    bool
-	colored  bool
-}
-
 type Ascii struct {
-	img image.Image
+	img    image.Image
 	config Config
 }
 
-func (ascii Ascii) generateAscii() error {
+func (ascii Ascii) generateAscii(w *io.Writer) error {
 	width, height := ascii.img.Bounds().Dx(), ascii.img.Bounds().Dy()
 	scaledW, scaledH := uint(width)/uint(ascii.config.scale), uint(height)/uint(ascii.config.scale)
 
 	dc := gg.NewContext(width, height)
 	dc.SetRGB(0, 0, 0)
-    dc.Clear()
+	dc.Clear()
+
+	// Default color if not using colored mode
 	dc.SetColor(color.RGBA{R: 201, G: 91, B: 201, A: 255})
 
-	if err := dc.LoadFontFace(ascii.config.fontPath, float64(ascii.config.scale)); err != nil {
-		return err
+	// manage font in cli mode
+	if ascii.config.mode == "cli" && ascii.config.fontPath != "" {
+		if err := dc.LoadFontFace(ascii.config.fontPath, float64(ascii.config.scale)); err != nil {
+			return err
+		}
 	}
-
-
-	imgResized := resize.Resize(scaledW, scaledH, ascii.img, resize.Bilinear)
-	for x := range scaledH {
-		for y := range scaledW {
-			c := imgResized.At(int(x), int(y))
-
-			b := getBrightness(c)
-			char := getCharFromBrightness(b)
-			str := append( make([]byte, 1), char)
-
-			dc.DrawString(string(str), float64(x * ascii.config.scale), float64(y * ascii.config.scale))
+	if ascii.config.mode == "server" {
+		if err := dc.LoadFontFace("./fonts/"+ascii.config.fontPath+".ttf", float64(ascii.config.scale)); err != nil {
+			return err
 		}
 	}
 
-    dc.SavePNG(ascii.config.path + "_ascii.png")
+	imgResized := resize.Resize(scaledW, scaledH, ascii.img, resize.Bilinear)
+	for y := range scaledH {
+		for x := range scaledW {
+			c := imgResized.At(int(x), int(y))
+
+			// If colored mode is enabled, set the drawing color to match the pixel
+			if ascii.config.colored {
+				r, g, b, _ := c.RGBA()
+				// Convert from 0-65535 range to 0-255 range
+				dc.SetColor(color.RGBA{
+					R: uint8(r >> 8),
+					G: uint8(g >> 8),
+					B: uint8(b >> 8),
+					A: 255,
+				})
+			}
+
+			b := getBrightness(c)
+			char := getCharFromBrightness(b)
+			str := append(make([]byte, 1), char)
+
+			dc.DrawString(string(str), float64(x*ascii.config.scale), float64(y*ascii.config.scale))
+		}
+	}
+
+	if ascii.config.mode == "server" {
+		if w == nil {
+			return fmt.Errorf("no writer provided")
+		}
+
+		err := dc.EncodePNG(*w)
+		if err != nil {
+			return err
+		}
+	} else {
+		dc.SavePNG(ascii.config.path + "_ascii.png")
+	}
+
 	return nil
 }
 
@@ -66,7 +92,7 @@ func (ascii Ascii) printAscii() {
 	for x := range height {
 		for y := range width {
 			c := imgResized.At(int(y), int(x))
-			
+
 			if ascii.config.colored {
 				fmt.Printf("%s", sprintColoredBackground(c))
 			} else {
