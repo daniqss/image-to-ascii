@@ -1,5 +1,6 @@
 # image to ascii
 tool to generate ascii art images from other images
+![example](./assets/image.png_ascii.png)
 
 ## how to run
 ```bash
