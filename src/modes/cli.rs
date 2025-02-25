@@ -1,7 +1,10 @@
 use super::Mode;
+use crate::Ascii;
 use clap::builder::ValueParser;
 use clap::Parser;
+use image::ImageReader;
 use std::ffi::OsString;
+use std::rc::Rc;
 
 #[derive(Parser, Debug)]
 #[command(
@@ -15,12 +18,12 @@ pub struct CliMode {
     /// path to the output image
     #[arg(short, long)]
     pub result_path: Option<OsString>,
-    /// path to the wanted font
-    #[arg(long, default_value = "/usr/share/fonts/OpenSans-BoldItalic.ttf")]
-    pub font_path: Option<OsString>,
     /// specify the processing scale
     #[arg(short, long, default_value = "8")]
-    pub scale: Option<usize>,
+    pub scale: usize,
+    /// density string to create the ascii art
+    #[arg(short, long, default_value = " .;coPO#@ ")]
+    pub density: String,
     /// print the result to the terminal
     #[arg(short, long)]
     pub print: Option<bool>,
@@ -39,6 +42,11 @@ fn parse_color(s: &str) -> Result<(u8, u8, u8), std::num::ParseIntError> {
 
 impl Mode for CliMode {
     fn run(&self) -> Result<(), Box<dyn std::error::Error>> {
-        Ok(println!("cli yupi mode"))
+        let img = Rc::new(ImageReader::open(&self.source_path)?.decode()?);
+
+        let ascii = Ascii::new(img, self.scale, self.density.clone(), self.color);
+        println!("{:?}", ascii);
+
+        Ok(())
     }
 }

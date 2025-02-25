@@ -1,6 +1,8 @@
 mod args;
+mod ascii;
 mod modes;
 use args::{ImageToAsciiArgs, ImageToAsciiCommand as Command};
+use ascii::Ascii;
 use clap::Parser;
 use modes::*;
 
