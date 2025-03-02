@@ -62,6 +62,7 @@ func manageArgs(args []string) (Config, error) {
 	fs.BoolVar(&config.help, "help", false, "Show this help message and exit")
 	fs.BoolVar(&config.help, "h", false, "Show this help message and exit")
 
+	// fancy trick jeje to work with the current implementation
 	config.density = config.density + " "
 
 	// Parse flags
@@ -93,6 +94,7 @@ func help() {
 	fmt.Println("  --mode string        Specify the mode (optional, default: cli)")
 	fmt.Println("  --fontPath string    Wanted font path (optional, default: /usr/share/fonts/OpenSans-BoldItalic.ttf)")
 	fmt.Println("  --scale uint8        Specify the processing scale (optional, default: 8)")
+	fmt.Println("  --density string     Specify the density (optional, default: \" .;coPO#@\")")
 	fmt.Println("  --print              Print the result (optional, default: false)")
 	fmt.Println("  --colored            Enable colored output (optional, default: false)")
 	fmt.Println("  -h, --help          Show this help message and exit")
