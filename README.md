@@ -16,8 +16,17 @@ curl -X GET "http://localhost:3000/api/v1/fonts"
 curl -X POST -F "image=@test/image.png" "http://localhost:3000/api/v1/?scale=16&colored=true&font=UbuntuNerdFont-Bold" --output output_ascii.png
 ```
 there are 3 query params:
-- scale: int
-- colored: bool
-- font: string
+- `scale`
+    - int
+    - default: 8
+- `density`
+    - string
+    - default: " .;coPO#@"
+- `colored`
+    - bool
+    - default: false
+- `font`
+    - string
+    - default: the used by [gg](https://pkg.go.dev/github.com/fogleman/gg@v1.3.0#section-readme) package
 
 `font` must be one of the fonts that are available on the server, you can get the list of available fonts by calling the first endpoint

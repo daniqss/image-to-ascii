@@ -98,6 +98,10 @@ func handleImageUploaded(w http.ResponseWriter, r *http.Request, config Config) 
 		}
 	}
 
+	if density := urlParams.Get("density"); density != "" {
+		config.density = density
+	}
+
 	if colored := urlParams.Get("colored"); colored != "" {
 		config.colored = colored == "true"
 	}
