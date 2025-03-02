@@ -14,9 +14,6 @@ import (
 	"github.com/nfnt/resize"
 )
 
-const DEFAULT_SCALE = 8
-const DENSITY = " .;coPO#@ "
-
 type Ascii struct {
 	img    image.Image
 	config Config
@@ -62,8 +59,8 @@ func (ascii Ascii) generateAscii(w *io.Writer) error {
 				})
 			}
 
-			b := getBrightness(c)
-			char := getCharFromBrightness(b)
+			b := ascii.getBrightness(c)
+			char := ascii.getCharFromBrightness(b)
 			str := append(make([]byte, 1), char)
 
 			dc.DrawString(string(str), float64(x*ascii.config.scale), float64(y*ascii.config.scale))
@@ -94,9 +91,9 @@ func (ascii Ascii) printAscii() {
 			c := imgResized.At(int(y), int(x))
 
 			if ascii.config.colored {
-				fmt.Printf("%s", sprintColoredBackground(c))
+				fmt.Printf("%s", ascii.sprintColoredBackground(c))
 			} else {
-				printAsciiChar(c)
+				ascii.printAsciiChar(c)
 			}
 		}
 		fmt.Printf("\033[0m\n")
@@ -105,7 +102,7 @@ func (ascii Ascii) printAscii() {
 	fmt.Printf("\033[0m")
 }
 
-func sprintColoredBackground(color color.Color) string {
+func (ascii Ascii) sprintColoredBackground(color color.Color) string {
 	r, g, b, _ := color.RGBA()
 
 	r8 := uint8(r >> 8)
@@ -114,13 +111,13 @@ func sprintColoredBackground(color color.Color) string {
 	return fmt.Sprintf("\033[48;2;%d;%d;%dm  ", r8, g8, b8)
 }
 
-func printAsciiChar(c color.Color) {
-	b := getBrightness(c)
-	char := getCharFromBrightness(b)
+func (ascii Ascii) printAsciiChar(c color.Color) {
+	b := ascii.getBrightness(c)
+	char := ascii.getCharFromBrightness(b)
 	fmt.Printf("%c%c", char, char)
 }
 
-func getBrightness(c color.Color) float64 {
+func (ascii Ascii) getBrightness(c color.Color) float64 {
 	r, g, b, _ := c.RGBA()
 
 	r8 := float64(r >> 8)
@@ -130,7 +127,7 @@ func getBrightness(c color.Color) float64 {
 	return 0.299*r8 + 0.587*g8 + 0.114*b8
 }
 
-func getCharFromBrightness(b float64) byte {
-	i := int(b / 255.0 * float64(utf8.RuneCountInString(DENSITY)-1))
-	return DENSITY[i]
+func (ascii Ascii) getCharFromBrightness(b float64) byte {
+	i := int(b / 255.0 * float64(utf8.RuneCountInString(ascii.config.density)-1))
+	return ascii.config.density[i]
 }
